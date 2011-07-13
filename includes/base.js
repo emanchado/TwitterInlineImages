@@ -1,11 +1,25 @@
 function addInlineImage(url, target) {
     var targetWidth = parseInt(window.getComputedStyle(target).width);
     var img = document.createElement("img");
+    if (url.indexOf("http:") === -1) {
+        url = "http:" + url;
+    }
     img.src = url;
     img.width = targetWidth - 100;
     img.style.marginLeft = "50px";
     // opera.postError("TwitterInlineImages added this image inline: " + url);
     target.appendChild(img);
+}
+
+function tryResolveImageUrl(url, fSuccess, fFailure) {
+    if (url.match(/\.jpg$/) || url.match(/\.png$/) || url.match(/\.gif$/)) {
+        fSuccess(url);
+    } else {
+        window.twttr.media.resolveImageUrl(url, 300, {
+            success: fSuccess,
+            error: fFailure || function() {},
+        });
+    }
 }
 
 window.addEventListener('load', function() {
@@ -24,26 +38,30 @@ window.addEventListener('load', function() {
 
             var nodes = target.getElementsByClassName("twitter-timeline-link");
             for (var i = 0, l = nodes.length; i < l; i += 1) {
-                var url = String.prototype.toString.call(nodes[i].href);
-                if (nodes[i].dataset.expandedUrl) {
-                    url = nodes[i].dataset.expandedUrl;
+                var n = nodes[i];
+                var url = String.prototype.toString.call(n.href);
+                if (n.dataset.expandedUrl) {
+                    url = n.dataset.expandedUrl;
                 }
-                window.twttr.media.resolveImageUrl(url, 300, {
-                    success: function(imageUrl) {
-                        var finalUrl = imageUrl;
-                        if (finalUrl.indexOf("http:") === -1) {
-                            // opera.postError("I get a URL without protocol???? " + finalUrl);
-                            finalUrl = "http:" + finalUrl;
-                        }
-                        addInlineImage(finalUrl, target);
+                tryResolveImageUrl(
+                    url,
+                    function(url) {
+                        addInlineImage(url, target);
                     },
-                    error: function() {
-                        if (url.match(/\.jpg$/) || url.match(/\.png$/) ||
-                                url.match(/\.gif$/)) {
-                            addInlineImage(url, target);
-                        }
-                    }
-                })
+                    function() {
+                        // Maybe we have to wait for the expanded URL
+                        // to be calculated
+                        n.addEventListener('DOMAttrModified',function(event) {
+                            if (event.attrName === 'data-expanded-url') {
+                                var expandedUrl = event.newValue;
+                                tryResolveImageUrl(
+                                    expandedUrl,
+                                    function(url) {
+                                        addInlineImage(url, target);
+                                    });
+                            }
+                        }, false);
+                    });
             }
         }
     }, false);
