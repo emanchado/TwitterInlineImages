@@ -28,9 +28,6 @@ window.addEventListener('load', function() {
                 if (nodes[i].dataset.expandedUrl) {
                     url = nodes[i].dataset.expandedUrl;
                 }
-                if (url.indexOf("http://t.co/") === 0 && nodes[i].title) {
-                    url = nodes[i].title;
-                }
                 window.twttr.media.resolveImageUrl(url, 300, {
                     success: function(imageUrl) {
                         var finalUrl = imageUrl;
