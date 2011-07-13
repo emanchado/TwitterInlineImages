@@ -1,7 +1,8 @@
 Twitter Inline Images
 =====================
 
-Twitter Inline Images is a very simple
+[Twitter Inline Images](https://addons.opera.com/addons/extensions/details/twitter-inline-images/)
+is a very simple
 [Opera extension](https://addons.opera.com/addons/extensions/) that
 shows images inline on Twitter. It's basically
 [ayosec](https://github.com/ayosec)'s
