@@ -7,7 +7,9 @@ function addInlineImage(url, target) {
     img.src = url;
     img.width = targetWidth - 100;
     img.style.marginLeft = "50px";
-    // opera.postError("TwitterInlineImages added this image inline: " + url);
+    /* opera.postError("TwitterInlineImages added this image inline: " + url +
+                    " ------------------"); */
+    target.dataset.imageAdded = true;
     target.appendChild(img);
 }
 
@@ -39,6 +41,26 @@ window.addEventListener('load', function() {
             var nodes = target.getElementsByClassName("twitter-timeline-link");
             for (var i = 0, l = nodes.length; i < l; i += 1) {
                 var n = nodes[i];
+
+                // Watch for changes in the expanded URL before we
+                // check the value, to avoid race conditions
+                n.addEventListener('DOMAttrModified',function(event) {
+                    if (event.target.dataset.imageAdded)
+                        return;
+                    if (event.attrName === 'data-expanded-url') {
+                        var expandedUrl = event.newValue;
+                        // opera.postError("data-expanded-url updated to " + expandedUrl);
+                        tryResolveImageUrl(
+                            expandedUrl,
+                            function(url) {
+                                addInlineImage(url, target);
+                            },
+                            function() {
+                                // opera.postError("Couldn't resolve image for " + expandedUrl);
+                            });
+                    }
+                }, false);
+
                 var url = String.prototype.toString.call(n.href);
                 if (n.dataset.expandedUrl) {
                     url = n.dataset.expandedUrl;
@@ -49,18 +71,7 @@ window.addEventListener('load', function() {
                         addInlineImage(url, target);
                     },
                     function() {
-                        // Maybe we have to wait for the expanded URL
-                        // to be calculated
-                        n.addEventListener('DOMAttrModified',function(event) {
-                            if (event.attrName === 'data-expanded-url') {
-                                var expandedUrl = event.newValue;
-                                tryResolveImageUrl(
-                                    expandedUrl,
-                                    function(url) {
-                                        addInlineImage(url, target);
-                                    });
-                            }
-                        }, false);
+                        // opera.postError("I didn't find the image, waiting for changes in attributes");
                     });
             }
         }
