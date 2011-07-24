@@ -5,8 +5,9 @@ function addInlineImage(url, target) {
         url = "http:" + url;
     }
     img.src = url;
-    img.width = targetWidth - 100;
-    img.style.marginLeft = "50px";
+    var imageWidth = Math.min(targetWidth - 100, img.naturalWidth);
+    img.width = imageWidth;
+    img.style.marginLeft = ((targetWidth - imageWidth) / 2) + "px";
     /* opera.postError("TwitterInlineImages added this image inline: " + url +
                     " ------------------"); */
     target.dataset.imageAdded = true;
