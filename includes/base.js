@@ -18,15 +18,19 @@ function tryResolveImageUrl(url, fSuccess, fFailure) {
     if (url.match(/\.jpg$/) || url.match(/\.png$/) || url.match(/\.gif$/)) {
         fSuccess(url);
     } else {
-        window.twttr.media.resolveImageUrl(url, 300, {
-            success: fSuccess,
-            error: fFailure || function() {},
-        });
+        if (window.twttr !== undefined && window.twttr.media !== undefined) {
+            window.twttr.media.resolveImageUrl(url, 300, {
+                success: fSuccess,
+                error: fFailure || function() {},
+            });
+        } else {
+            opera.postError("ERROR: window.twttr.media is not defined");
+        }
     }
 }
 
-window.addEventListener('load', function() {
-    window.addEventListener('DOMNodeInserted', function(event) {
+function newNodeHandler(w) {
+    w.addEventListener('DOMNodeInserted', function(event) {
         var target = event.target;
 
         if (target.dataset && target.dataset.itemType === "tweet") {
@@ -77,4 +81,19 @@ window.addEventListener('load', function() {
             }
         }
     }, false);
+}
+
+window.addEventListener('load', function(event) {
+    // 'WATCH' is only defined in the main document, not some iframe
+    // created by Twitter
+    if (window.WATCH !== undefined) {
+        window.WATCH('boot', function() {
+            if (window.using !== undefined) {
+                window.using(">api_ready", function() {
+                    // opera.postError("Calling the node handler");
+                    newNodeHandler(window);
+                });
+            }
+        });
+    }
 }, false);
