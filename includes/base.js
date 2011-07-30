@@ -5,13 +5,16 @@ function addInlineImage(url, target) {
         url = "http:" + url;
     }
     img.src = url;
-    var imageWidth = Math.min(targetWidth - 100, img.naturalWidth);
-    img.width = imageWidth;
-    img.style.marginLeft = ((targetWidth - imageWidth) / 2) + "px";
-    /* opera.postError("TwitterInlineImages added this image inline: " + url +
-                    " ------------------"); */
-    target.dataset.imageAdded = true;
-    target.appendChild(img);
+    img.addEventListener('load', function() {
+        var imageWidth = Math.min(targetWidth - 100, img.naturalWidth);
+        img.width = imageWidth;
+        img.style.marginLeft = ((targetWidth - imageWidth) / 2) + "px";
+        /* opera.postError("TwitterInlineImages added this image inline: " + url +
+                        " with width " + imageWidth + " and margin " +
+                        img.style.marginLeft + " ------------------"); */
+        target.dataset.imageAdded = true;
+        target.appendChild(img);
+    }, false);
 }
 
 function tryResolveImageUrl(url, fSuccess, fFailure) {
