@@ -32,6 +32,45 @@ function tryResolveImageUrl(url, fSuccess, fFailure) {
     }
 }
 
+function resolveImages(target) {
+    var nodes = target.getElementsByClassName("twitter-timeline-link");
+    for (var i = 0, l = nodes.length; i < l; i += 1) {
+        var n = nodes[i];
+
+        // Watch for changes in the expanded URL before we
+        // check the value, to avoid race conditions
+        n.addEventListener('DOMAttrModified',function(event) {
+            if (event.target.dataset.imageAdded)
+                return;
+            if (event.attrName === 'data-expanded-url') {
+                var expandedUrl = event.newValue;
+                // opera.postError("data-expanded-url updated to " + expandedUrl);
+                tryResolveImageUrl(
+                    expandedUrl,
+                    function(url) {
+                        addInlineImage(url, target);
+                    },
+                    function() {
+                        // opera.postError("Couldn't resolve image for " + expandedUrl);
+                    });
+            }
+        }, false);
+
+        var url = String.prototype.toString.call(n.href);
+        if (n.dataset.expandedUrl) {
+            url = n.dataset.expandedUrl;
+        }
+        tryResolveImageUrl(
+            url,
+            function(url) {
+                addInlineImage(url, target);
+            },
+            function() {
+                // opera.postError("I didn't find the image, waiting for changes in attributes");
+            });
+    }
+}
+
 function newNodeHandler(w) {
     w.addEventListener('DOMNodeInserted', function(event) {
         var target = event.target;
@@ -46,42 +85,7 @@ function newNodeHandler(w) {
                 return;
             }
 
-            var nodes = target.getElementsByClassName("twitter-timeline-link");
-            for (var i = 0, l = nodes.length; i < l; i += 1) {
-                var n = nodes[i];
-
-                // Watch for changes in the expanded URL before we
-                // check the value, to avoid race conditions
-                n.addEventListener('DOMAttrModified',function(event) {
-                    if (event.target.dataset.imageAdded)
-                        return;
-                    if (event.attrName === 'data-expanded-url') {
-                        var expandedUrl = event.newValue;
-                        // opera.postError("data-expanded-url updated to " + expandedUrl);
-                        tryResolveImageUrl(
-                            expandedUrl,
-                            function(url) {
-                                addInlineImage(url, target);
-                            },
-                            function() {
-                                // opera.postError("Couldn't resolve image for " + expandedUrl);
-                            });
-                    }
-                }, false);
-
-                var url = String.prototype.toString.call(n.href);
-                if (n.dataset.expandedUrl) {
-                    url = n.dataset.expandedUrl;
-                }
-                tryResolveImageUrl(
-                    url,
-                    function(url) {
-                        addInlineImage(url, target);
-                    },
-                    function() {
-                        // opera.postError("I didn't find the image, waiting for changes in attributes");
-                    });
-            }
+            resolveImages(target);
         }
     }, false);
 }
@@ -95,6 +99,10 @@ window.addEventListener('load', function(event) {
                 window.using(">api_ready", function() {
                     // opera.postError("Calling the node handler");
                     newNodeHandler(window);
+                    var nodes = window.document.getElementsByClassName("stream-item");
+                    for (var i = 0, l = nodes.length; i < l; i += 1) {
+                        resolveImages(nodes[i]);
+                    }
                 });
             }
         });
