@@ -10,7 +10,7 @@ function debug(str, url) {
 function addInlineImage(url, target) {
     var targetWidth = parseInt(window.getComputedStyle(target).width);
     var img = document.createElement("img");
-    if (url.indexOf("http:") === -1) {
+    if (url.indexOf("http") !== 0) {
         url = "http:" + url;
     }
     img.src = url;
