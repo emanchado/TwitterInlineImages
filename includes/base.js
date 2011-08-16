@@ -1,8 +1,8 @@
-var debug            = false;
+var _debug           = true;
 var watchImageRegExp = /tsqi/;
 
 function debug(str, url) {
-    if (debug && (!url || url.match(watchImageRegExp))) {
+    if (_debug && (!url || url.match(watchImageRegExp))) {
         opera.postError(str);
     }
 }
