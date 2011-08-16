@@ -1,3 +1,12 @@
+var debug            = false;
+var watchImageRegExp = /tsqi/;
+
+function debug(str, url) {
+    if (debug && (!url || url.match(watchImageRegExp))) {
+        opera.postError(str);
+    }
+}
+
 function addInlineImage(url, target) {
     var targetWidth = parseInt(window.getComputedStyle(target).width);
     var img = document.createElement("img");
@@ -5,13 +14,15 @@ function addInlineImage(url, target) {
         url = "http:" + url;
     }
     img.src = url;
+    debug("Creating img element for " + url, url);
     img.addEventListener('load', function() {
         var imageWidth = Math.min(targetWidth - 100, img.naturalWidth);
         img.width = imageWidth;
         img.style.marginLeft = ((targetWidth - imageWidth) / 2) + "px";
-        /* opera.postError("TwitterInlineImages added this image inline: " + url +
-                        " with width " + imageWidth + " and margin " +
-                        img.style.marginLeft + " ------------------"); */
+        debug("TwitterInlineImages added this image inline: " + url +
+                  " with width " + imageWidth + " and margin " +
+                  img.style.marginLeft + " ------------------",
+              url);
         target.dataset.imageAdded = true;
         target.appendChild(img);
     }, false);
@@ -44,20 +55,22 @@ function resolveImages(target) {
                 return;
             if (event.attrName === 'data-expanded-url') {
                 var expandedUrl = event.newValue;
-                // opera.postError("data-expanded-url updated to " + expandedUrl);
+                debug("data-expanded-url updated to " + expandedUrl, expandedUrl);
                 tryResolveImageUrl(
                     expandedUrl,
                     function(url) {
                         addInlineImage(url, target);
                     },
                     function() {
-                        // opera.postError("Couldn't resolve image for " + expandedUrl);
+                        debug("Couldn't resolve image for " + expandedUrl, expandedUrl);
                     });
             }
         }, false);
 
         var url = String.prototype.toString.call(n.href);
+        debug("I peep into a link to " + url, url);
         if (n.dataset.expandedUrl) {
+            debug("Expanded URL is " + n.dataset.expandedUrl, url);
             url = n.dataset.expandedUrl;
         }
         tryResolveImageUrl(
@@ -66,7 +79,7 @@ function resolveImages(target) {
                 addInlineImage(url, target);
             },
             function() {
-                // opera.postError("I didn't find the image, waiting for changes in attributes");
+                debug("I didn't find the image in " + url + ", waiting for changes in attributes", url);
             });
     }
 }
