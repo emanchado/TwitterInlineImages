@@ -96,8 +96,7 @@ window.addEventListener('load', function(event) {
     if (window.WATCH !== undefined) {
         window.WATCH('boot', function() {
             if (window.using !== undefined) {
-                window.using(">api_ready", function() {
-                    // opera.postError("Calling the node handler");
+                window.using("bundle/phoenix-core", function() {
                     newNodeHandler(window);
                     var nodes = window.document.getElementsByClassName("stream-item");
                     for (var i = 0, l = nodes.length; i < l; i += 1) {
