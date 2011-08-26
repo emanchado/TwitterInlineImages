@@ -107,11 +107,16 @@ window.addEventListener('load', function(event) {
     // 'WATCH' is only defined in the main document, not some iframe
     // created by Twitter
     if (window.WATCH !== undefined) {
-        window.WATCH('fullyLoaded', function() {
-            newNodeHandler(window);
-            var nodes = window.document.getElementsByClassName("stream-item");
-            for (var i = 0, l = nodes.length; i < l; i += 1) {
-                resolveImages(nodes[i]);
+        window.WATCH('boot', function() {
+            if (window.using !== undefined) {
+                window.using(window.twttr.bundleMore,function(){
+                    newNodeHandler(window);
+                    var nodes =
+                        window.document.getElementsByClassName("stream-item");
+                    for (var i = 0, l = nodes.length; i < l; i += 1) {
+                        resolveImages(nodes[i]);
+                    }
+                });
             }
         });
     }
