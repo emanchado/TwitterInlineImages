@@ -1,3 +1,21 @@
+DEPRECATED
+==========
+
+This extension is deprecated. It hasn't worked for a while but I don't have the time nor the inclination to fix it.
+Besides, it was written for Opera 12 so it will not work (I guess?) on Opera >= 15.
+
+
+
+
+
+
+
+
+
+
+
+Old README contents
+===================
 Twitter Inline Images
 =====================
 
